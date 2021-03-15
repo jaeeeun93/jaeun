@@ -2,7 +2,6 @@ package kr.watw.jaeun.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,16 +17,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .inMemoryAuthentication()
-                .withUser("watwAdmin").password(passwordEncoder().encode("adminPw")).roles("ADMIN")
+                .withUser("admin").password(passwordEncoder().encode("adminPw")).roles("ADMIN")
                 .and()
-                .withUser("watwUser").password(passwordEncoder().encode("userPw")).roles("USER");
+                .withUser("user").password(passwordEncoder().encode("userPw")).roles("USER")
+                .and()
+                .withUser("manager").password(passwordEncoder().encode("managePw")).roles("MANAGER");
     }
 
    @Override
    protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                //.anyRequest().authenticated()
+                .antMatchers("/index.html").permitAll()
+                .antMatchers("/profile/**").authenticated()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/manager/**").hasAnyRole("ADMIN","MANAGER")
                 .and()
                 .httpBasic();
    }
